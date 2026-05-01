@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCALEMEDIA | Growth that compounds</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS resets and variables */
+        :root {
+            --bg: #080808;
+            --text-main: #f2ede6;
+            --text-muted: #444444;
+            --text-muted-light: #888888;
+            --accent: #c8ff00;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: none; /* Custom cursor */
+        }
+
+        html {
+            scroll-behavior: auto;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Ubuntu', sans-serif;
+            overflow-x: hidden;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4, h5, h6, .syne {
+            font-family: 'Ubuntu', sans-serif;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        /* Video Background */
+        #bg-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        #bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(8, 8, 8, 0.75); /* Dark overlay for typography contrast */
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Custom Cursor */
+        .cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 8px;
+            height: 8px;
+            background-color: var(--text-main);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), height 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s;
+            mix-blend-mode: difference;
+        }
+
+        .cursor.hovered {
+            width: 32px;
+            height: 32px;
+            background-color: var(--text-main);
+        }
+
+        /* Loader */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background-color: var(--bg);
+            z-index: 9998;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #loader .brand-text {
+            font-family: 'Ubuntu', sans-serif;
+            font-size: 2rem;
+            letter-spacing: 0.2em;
+            text-transform: capitalize;
+            display: flex;
+        }
+        
+        #loader .brand-text span {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        #loader .progress {
+            width: 0%;
+            height: 1px;
+            background-color: var(--text-main);
+            margin-top: 1rem;
+            max-width: 200px;
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 0 5vw;
+            z-index: 10;
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 8vw, 6rem);
+            margin-bottom: 2rem;
+            text-transform: capitalize;
+        }
+        
+        .hero h1 span {
+            display: block;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            font-weight: 300;
+            margin-bottom: 3rem;
+            opacity: 0;
+            max-width: 600px;
+            text-transform: capitalize;
+        }
+
+        .cta-link {
+            text-transform: capitalize;
+            display: inline-block;
+            position: relative;
+            padding-bottom: 4px;
+            font-size: 1.1rem;
+            opacity: 0;
+        }
+
+        .cta-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0%;
+            height: 1px;
+            background-color: var(--accent);
+            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .cta-link:hover::after {
+            width: 100%;
+        }
+
+        .cta-link:hover {
+            color: var(--accent);
+        }
+
+        /* Scroll Narrative */
+        .narrative {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 0 5vw;
+            background-color: transparent;
+        }
+
+        .narrative-text {
+            font-size: clamp(2rem, 5vw, 4rem);
+            text-align: center;
+            font-family: 'Ubuntu', sans-serif;
+            text-transform: capitalize;
+            position: absolute;
+            opacity: 0;
+            clip-path: polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%);
+            max-width: 900px;
+        }
+
+        /* Services Section */
+        .services {
+            padding: 10vw 5vw;
+            background: transparent;
+        }
+
+        .services-grid {
+            display: flex;
+            flex-direction: column;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .service-item {
+            padding: 2.5rem 0;
+            border-bottom: 1px solid rgba(242, 237, 230, 0.1);
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .service-item:first-child {
+            border-top: 1px solid rgba(242, 237, 230, 0.1);
+        }
+
+        .service-item h3 {
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            text-transform: capitalize;
+            margin-bottom: 0.5rem;
+            transition: color 0.3s;
+        }
+        
+        .service-item:hover h3 {
+            color: var(--accent);
+        }
+
+        .service-item p {
+            font-size: 1.1rem;
+            color: var(--text-muted-light);
+            font-weight: 300;
+            text-transform: capitalize;
+        }
+
+        /* Results Section */
+        .results {
+            padding: 10vw 5vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6rem;
+            background: transparent;
+        }
+
+        .stat {
+            flex: 1;
+            min-width: 250px;
+            text-align: center;
+        }
+
+        .stat-num {
+            font-size: clamp(4rem, 10vw, 8rem);
+            font-family: 'Ubuntu', sans-serif;
+            color: var(--text-main);
+            line-height: 1;
+            margin-bottom: 1rem;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: var(--text-muted-light);
+            text-transform: capitalize;
+        }
+
+        /* Process Section */
+        .process {
+            overflow: hidden;
+            padding: 10vw 0;
+            background: transparent;
+        }
+
+        .process-container {
+            display: flex;
+            width: max-content;
+            padding: 0 5vw;
+        }
+
+        .process-step {
+            width: 60vw;
+            min-width: 400px;
+            padding-right: 5vw;
+            flex-shrink: 0;
+        }
+
+        .process-step h4 {
+            font-size: 2rem;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            text-transform: capitalize;
+        }
+
+        .process-step p {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-family: 'Ubuntu', sans-serif;
+            line-height: 1.2;
+            text-transform: capitalize;
+        }
+
+        /* Team Section */
+        .team {
+            padding: 10vw 5vw;
+            display: flex;
+            justify-content: center;
+            text-align: center;
+            background: transparent;
+        }
+
+        .team p {
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            font-family: 'Ubuntu', sans-serif;
+            max-width: 900px;
+            text-transform: capitalize;
+            color: var(--text-muted-light);
+            line-height: 1.4;
+        }
+
+        .team p span {
+            color: var(--text-main);
+        }
+
+        /* Pricing Section */
+        .pricing {
+            padding: 120px 5vw;
+            background: transparent;
+        }
+
+        .pricing-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .pricing-header h2 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            text-transform: capitalize;
+            margin-bottom: 1rem;
+        }
+
+        .pricing-header p {
+            font-size: 1.1rem;
+            color: var(--text-muted-light);
+            text-transform: capitalize;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .pricing-card {
+            border: 1px solid rgba(242, 237, 230, 0.1);
+            padding: 3rem 2.5rem;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s;
+            position: relative;
+            background-color: rgba(8, 8, 8, 0.4);
+            backdrop-filter: blur(12px);
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(242, 237, 230, 0.3);
+        }
+
+        .pricing-card.featured {
+            border-color: var(--accent);
+        }
+
+        .pricing-card.featured:hover {
+            border-color: var(--accent);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--accent);
+            color: #000;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-family: 'Ubuntu', sans-serif;
+            font-weight: 500;
+            text-transform: capitalize;
+            letter-spacing: 0.05em;
+        }
+
+        .card-name {
+            font-size: 24px;
+            font-family: 'Ubuntu', sans-serif;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-transform: capitalize;
+            color: var(--text-main);
+        }
+
+        .card-tag {
+            font-size: 13px;
+            font-family: 'Ubuntu', sans-serif;
+            color: #999999;
+            margin-bottom: 2rem;
+            text-transform: capitalize;
+        }
+
+        .card-price {
+            font-size: 36px;
+            font-family: 'Ubuntu', sans-serif;
+            font-weight: 700;
+            margin-bottom: 2.5rem;
+            text-transform: capitalize;
+            color: var(--text-main);
+        }
+
+        .card-services {
+            list-style: none;
+            margin-bottom: 3rem;
+            flex-grow: 1;
+        }
+
+        .card-services li {
+            font-size: 14px;
+            font-family: 'Ubuntu', sans-serif;
+            color: #bbbbbb;
+            margin-bottom: 1rem;
+            display: flex;
+            text-transform: capitalize;
+            line-height: 1.5;
+        }
+
+        .card-services li::before {
+            content: '—';
+            margin-right: 0.75rem;
+            color: #666;
+        }
+
+        .btn-pricing {
+            width: 100%;
+            padding: 1.25rem;
+            text-align: center;
+            border-radius: 30px;
+            font-family: 'Ubuntu', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: capitalize;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--text-main);
+            cursor: none;
+        }
+
+        .btn-pricing:hover {
+            background-color: var(--text-main);
+            color: var(--bg);
+        }
+
+        .pricing-card.featured .btn-pricing {
+            background-color: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+        }
+
+        .pricing-card.featured .btn-pricing:hover {
+            background-color: transparent;
+            color: var(--accent);
+        }
+
+        .pricing-footer {
+            text-align: center;
+            margin-top: 5rem;
+        }
+        
+        .pricing-footer p {
+            color: var(--text-muted-light);
+            font-size: 14px;
+            margin-bottom: 1rem;
+            text-transform: capitalize;
+        }
+
+        .pricing-footer a {
+            color: var(--text-main);
+            text-decoration: underline;
+            text-decoration-color: var(--text-muted);
+            text-underline-offset: 6px;
+            font-size: 14px;
+            transition: color 0.3s;
+            text-transform: capitalize;
+        }
+
+        .pricing-footer a:hover {
+            color: var(--accent);
+            text-decoration-color: var(--accent);
+        }
+
+        /* Book A Call Section */
+        .book-call {
+            padding: 100px 5vw;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: transparent;
+        }
+
+        .book-call h2 {
+            font-size: clamp(3rem, 6vw, 5rem);
+            margin-bottom: 4rem;
+            text-transform: capitalize;
+        }
+
+        .contact-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 5rem;
+            align-items: center;
+        }
+
+        .contact-list a {
+            font-size: 15px;
+            font-family: 'Ubuntu', sans-serif;
+            color: #aaaaaa;
+            text-transform: capitalize;
+            transition: color 0.3s;
+            display: inline-block;
+        }
+
+        .contact-list a:hover {
+            color: var(--text-main);
+        }
+
+        .btn-cta {
+            display: inline-block;
+            padding: 1.25rem 3.5rem;
+            border: 1px solid var(--text-main);
+            border-radius: 50px;
+            color: var(--text-main);
+            font-family: 'Ubuntu', sans-serif;
+            text-transform: capitalize;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            font-size: 1.1rem;
+            backdrop-filter: blur(5px);
+        }
+
+        .btn-cta:hover {
+            background-color: var(--text-main);
+            color: var(--bg);
+        }
+
+        /* New Contact Split Section */
+        .contact-split {
+            padding: 120px 5vw;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            background-color: transparent;
+        }
+
+        @media (max-width: 768px) {
+            .contact-split {
+                grid-template-columns: 1fr;
+                gap: 60px;
+            }
+        }
+
+        .contact-left h2 {
+            font-size: clamp(3.5rem, 8vw, 5rem);
+            color: var(--text-main);
+            text-transform: capitalize;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .contact-right {
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        .contact-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .contact-label {
+            font-size: 12px;
+            font-family: 'Ubuntu', sans-serif;
+            color: #777777;
+            text-transform: capitalize;
+            letter-spacing: 0.05em;
+        }
+
+        .contact-value {
+            font-size: 18px;
+            font-family: 'Ubuntu', sans-serif;
+            color: var(--text-main);
+            transition: color 0.2s ease;
+            text-transform: capitalize;
+        }
+
+        .contact-value:hover {
+            color: var(--accent);
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid rgba(242, 237, 230, 0.1);
+            padding: 32px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 24px;
+            background: transparent;
+        }
+
+        @media (max-width: 768px) {
+            footer {
+                padding: 32px 5vw;
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        .footer-text {
+            font-size: 13px;
+            font-family: 'Ubuntu', sans-serif;
+            color: #777777;
+            text-transform: capitalize;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 32px;
+        }
+
+        .footer-links a {
+            font-size: 13px;
+            font-family: 'Ubuntu', sans-serif;
+            color: #777777;
+            transition: color 0.2s;
+            text-transform: capitalize;
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            color: var(--text-main);
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Video Background -->
+    <video autoplay loop muted playsinline id="bg-video">
+        <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260418_080021_d598092b-c4c2-4e53-8e46-94cf9064cd50.mp4" type="video/mp4">
+    </video>
+    <div id="bg-overlay"></div>
+
+    <!-- Custom Cursor -->
+    <div class="cursor" id="cursor"></div>
+
+    <!-- Loader -->
+    <div id="loader">
+        <div class="brand-text" id="loader-text">
+            <span>s</span><span>c</span><span>a</span><span>l</span><span>e</span><span>m</span><span>e</span><span>d</span><span>i</span><span>a</span>
+        </div>
+        <div class="progress" id="loader-progress"></div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1 id="hero-headline">
+            <span class="hl-line">your content</span>
+            <span class="hl-line">isn't the problem.</span>
+            <span class="hl-line">your strategy is.</span>
+        </h1>
+        <p id="hero-subline">we fix the system behind your social media.</p>
+        <div>
+            <a href="#contact" class="cta-link" data-hover>let's talk &rarr;</a>
+        </div>
+    </section>
+
+    <!-- Scroll Narrative -->
+    <section class="narrative" id="narrative-section">
+        <div class="narrative-text n-beat">you're posting every day</div>
+        <div class="narrative-text n-beat">and getting nothing back</div>
+        <div class="narrative-text n-beat">because content without strategy is just noise</div>
+        <div class="narrative-text n-beat" style="color: var(--accent)">scalemedia builds the system that turns attention into revenue</div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services">
+        <div class="services-grid">
+            <div class="service-item">
+                <h3>social media strategy</h3>
+                <p>data-driven roadmaps for growth</p>
+            </div>
+            <div class="service-item">
+                <h3>content production</h3>
+                <p>high-quality visuals and video</p>
+            </div>
+            <div class="service-item">
+                <h3>content writing</h3>
+                <p>captions, blogs, ad copy</p>
+            </div>
+            <div class="service-item">
+                <h3>content strategy</h3>
+                <p>what to post, when, and why</p>
+            </div>
+            <div class="service-item">
+                <h3>brand positioning</h3>
+                <p>stand out in crowded markets</p>
+            </div>
+            <div class="service-item">
+                <h3>paid ads (meta & google)</h3>
+                <p>scalable acquisition systems</p>
+            </div>
+            <div class="service-item">
+                <h3>seo</h3>
+                <p>search engine visibility</p>
+            </div>
+            <div class="service-item">
+                <h3>web design & development</h3>
+                <p>high-converting landing pages</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Results Section -->
+    <section class="results" id="results-section">
+        <div class="stat">
+            <div class="stat-num" data-target="10">0</div>
+            <div class="stat-label">average reach growth</div>
+        </div>
+        <div class="stat">
+            <div class="stat-num" data-target="3">0</div>
+            <div class="stat-label">avg engagement rate increase</div>
+        </div>
+        <div class="stat">
+            <div class="stat-num" data-target="47">0</div>
+            <div class="stat-label">brands scaled</div>
+        </div>
+    </section>
+
+    <!-- Process Section -->
+    <section class="process" id="process-section">
+        <div class="process-container" id="process-container">
+            <div class="process-step">
+                <h4>step 1: audit</h4>
+                <p>we go deep into your brand</p>
+            </div>
+            <div class="process-step">
+                <h4>step 2: strategy</h4>
+                <p>we build the system</p>
+            </div>
+            <div class="process-step">
+                <h4>step 3: execute</h4>
+                <p>we create, publish, optimise</p>
+            </div>
+            <div class="process-step">
+                <h4>step 4: scale</h4>
+                <p>we push what works</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="team">
+        <p>scalemedia is a small team of strategists, creators, and media buyers obsessed with one thing — <span>growth that compounds.</span></p>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing">
+        <div class="pricing-header">
+            <h2>simple pricing. serious results.</h2>
+            <p>no retainers that do nothing. pick the system that fits where you are.</p>
+        </div>
+        
+        <div class="pricing-grid">
+            <!-- Card 1 -->
+            <div class="pricing-card">
+                <div class="card-name">starter</div>
+                <div class="card-tag">for brands just getting started</div>
+                <div class="card-price">₹5,000 / month</div>
+                <ul class="card-services">
+                    <li>brand positioning</li>
+                    <li>content strategy</li>
+                    <li>instagram management</li>
+                    <li>4 posts / reels per month</li>
+                    <li>basic growth setup</li>
+                    <li>1 content edit per week</li>
+                    <li>basic audience targeting</li>
+                    <li>monthly check-in call</li>
+                </ul>
+                <a href="#contact" class="btn-pricing" data-hover>get started &rarr;</a>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="pricing-card featured">
+                <div class="popular-badge">most popular</div>
+                <div class="card-name">growth</div>
+                <div class="card-tag">for brands ready to dominate</div>
+                <div class="card-price">₹11,999 / month</div>
+                <ul class="card-services">
+                    <li>everything in starter</li>
+                    <li>instagram + facebook management</li>
+                    <li>12–16 posts per month (6–8 reels + 6–8 creatives)</li>
+                    <li>advanced reel editing (hooks, trends, transitions)</li>
+                    <li>full content calendar & strategy</li>
+                    <li>niche research & competitor analysis</li>
+                    <li>engaging captions + strong CTAs</li>
+                    <li>custom hashtag strategy</li>
+                    <li>posting time optimisation</li>
+                    <li>basic comment management</li>
+                    <li>monthly performance report</li>
+                </ul>
+                <a href="#contact" class="btn-pricing" data-hover>let's scale &rarr;</a>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="pricing-card">
+                <div class="card-name">scale</div>
+                <div class="card-tag">for brands ready to dominate</div>
+                <div class="card-price">₹15,999+ / month</div>
+                <ul class="card-services">
+                    <li>everything in growth</li>
+                    <li>paid ads management (Meta — Instagram + Facebook)</li>
+                    <li>seo basics & on-page optimisation</li>
+                    <li>content writing (captions, blogs, ad copy)</li>
+                    <li>multi-platform social media strategy</li>
+                    <li>web landing page design (1 per quarter)</li>
+                    <li>weekly performance reporting & optimisation</li>
+                    <li>dedicated account strategist</li>
+                    <li>priority response & support</li>
+                </ul>
+                <a href="#contact" class="btn-pricing" data-hover>apply now &rarr;</a>
+            </div>
+        </div>
+
+        <div class="pricing-footer">
+            <p>all plans are month-to-month. no lock-in contracts.</p>
+            <a href="#contact" data-hover>not sure which plan? &rarr; book a free audit call</a>
+        </div>
+    </section>
+
+    <!-- Book A Call Section -->
+    <section class="book-call">
+        <h2>ready to scale?</h2>
+        <div class="contact-list">
+            <a href="mailto:scalemedia2214@gmail.com" data-hover>email — scalemedia2214@gmail.com</a>
+            <a href="tel:+917021850759" data-hover>call — +91 70218 50759</a>
+            <a href="https://wa.me/918591725750" data-hover target="_blank">whatsapp — +91 85917 25750</a>
+            <a href="https://www.instagram.com/scalemedia_1/" data-hover target="_blank">instagram — @scalemedia_1</a>
+        </div>
+        <a href="#contact" class="btn-cta" data-hover>book a call</a>
+    </section>
+
+    <!-- Contact Split Section -->
+    <section class="contact-split" id="contact">
+        <div class="contact-left">
+            <h2 id="split-title">let's talk.</h2>
+        </div>
+        <div class="contact-right" id="split-details">
+            <div class="contact-item">
+                <span class="contact-label">email</span>
+                <a href="mailto:scalemedia2214@gmail.com" class="contact-value" data-hover>scalemedia2214@gmail.com</a>
+            </div>
+            <div class="contact-item">
+                <span class="contact-label">call us</span>
+                <a href="tel:+917021850759" class="contact-value" data-hover>+91 70218 50759</a>
+            </div>
+            <div class="contact-item">
+                <span class="contact-label">whatsapp</span>
+                <a href="https://wa.me/918591725750" class="contact-value" data-hover target="_blank">+91 85917 25750</a>
+            </div>
+            <div class="contact-item">
+                <span class="contact-label">instagram</span>
+                <a href="https://www.instagram.com/scalemedia_1/" class="contact-value" data-hover target="_blank">@scalemedia_1</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-text">scalemedia &copy; 2026</div>
+        <div class="footer-text">mumbai, india</div>
+        <div class="footer-links">
+            <a href="https://www.instagram.com/scalemedia_1/" data-hover target="_blank">instagram</a>
+            <a href="mailto:scalemedia2214@gmail.com" data-hover>email</a>
+            <a href="https://wa.me/918591725750" data-hover target="_blank">whatsapp</a>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        // Register ScrollTrigger
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Custom Cursor
+        const cursor = document.getElementById('cursor');
+        const hoverElements = document.querySelectorAll('a, button, [data-hover]');
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+        });
+
+        hoverElements.forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+        });
+
+        // Loader
+        const tlLoader = gsap.timeline();
+        
+        tlLoader.to('#loader-text span', {
+            opacity: 1,
+            y: 0,
+            duration: 0.1,
+            stagger: 0.05,
+            ease: 'power2.out'
+        })
+        .to('#loader-progress', {
+            width: '100%',
+            duration: 1,
+            ease: 'power2.inOut'
+        })
+        .to('#loader', {
+            opacity: 0,
+            duration: 0.5,
+            ease: 'power2.inOut',
+            onComplete: () => {
+                document.getElementById('loader').style.display = 'none';
+                initHeroAnimations();
+            }
+        });
+
+        function initHeroAnimations() {
+            const tlHero = gsap.timeline();
+            tlHero.to('.hl-line', {
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                stagger: 0.2,
+                ease: 'power3.out'
+            })
+            .to('#hero-subline', {
+                opacity: 1,
+                duration: 0.8,
+                ease: 'power2.out'
+            }, "-=0.4")
+            .to('.cta-link', {
+                opacity: 1,
+                duration: 0.5,
+                ease: 'power2.out'
+            }, "-=0.2");
+        }
+
+        // Scroll Narrative
+        const narrativeBeats = gsap.utils.toArray('.n-beat');
+        
+        const tlNarrative = gsap.timeline({
+            scrollTrigger: {
+                trigger: '#narrative-section',
+                start: 'top top',
+                end: '+=300%',
+                pin: true,
+                scrub: 1
+            }
+        });
+
+        narrativeBeats.forEach((beat, i) => {
+            tlNarrative.fromTo(beat, 
+                { opacity: 0, clipPath: 'polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)' },
+                { opacity: 1, clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)', duration: 1, ease: 'power2.inOut' }
+            );
+            if(i !== narrativeBeats.length - 1) {
+                tlNarrative.to(beat, { opacity: 0, duration: 0.5, ease: 'power2.inOut' });
+            }
+        });
+
+        // Services
+        gsap.utils.toArray('.service-item').forEach(item => {
+            gsap.to(item, {
+                scrollTrigger: {
+                    trigger: item,
+                    start: 'top 85%'
+                },
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                ease: 'power3.out'
+            });
+        });
+
+        // Results Counting
+        const resultsSection = document.getElementById('results-section');
+        ScrollTrigger.create({
+            trigger: resultsSection,
+            start: 'top 80%',
+            once: true,
+            onEnter: () => {
+                const targets = document.querySelectorAll('.stat-num');
+                targets.forEach(t => {
+                    const endValue = parseInt(t.getAttribute('data-target'));
+                    gsap.to(t, {
+                        innerHTML: endValue,
+                        duration: 2,
+                        snap: { innerHTML: 1 },
+                        ease: 'power2.out',
+                        onUpdate: function() {
+                            let val = Math.round(this.targets()[0].innerHTML);
+                            if (endValue === 10) t.innerHTML = val + 'x';
+                            else if (endValue === 3) t.innerHTML = val + 'x';
+                            else if (endValue === 47) t.innerHTML = val + '+';
+                            else t.innerHTML = val;
+                        }
+                    });
+                });
+            }
+        });
+
+        // Process Horizontal Scroll
+        const processContainer = document.getElementById('process-container');
+        gsap.to(processContainer, {
+            x: () => -(processContainer.scrollWidth - window.innerWidth),
+            ease: "none",
+            scrollTrigger: {
+                trigger: "#process-section",
+                pin: true,
+                scrub: 1,
+                end: () => "+=" + (processContainer.scrollWidth - window.innerWidth)
+            }
+        });
+
+        // Pricing Stagger
+        gsap.to('.pricing-card', {
+            scrollTrigger: {
+                trigger: '.pricing-grid',
+                start: 'top 80%'
+            },
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            stagger: 0.15,
+            ease: 'power3.out'
+        });
+
+        // Contact Split Animation
+        const contactSplitTl = gsap.timeline({
+            scrollTrigger: {
+                trigger: '.contact-split',
+                start: 'top 80%'
+            }
+        });
+
+        contactSplitTl.fromTo('#split-title', 
+            { opacity: 0, x: -50 },
+            { opacity: 1, x: 0, duration: 0.8, ease: 'power3.out' }
+        ).fromTo('.contact-item',
+            { opacity: 0, y: 20 },
+            { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: 'power3.out' },
+            "-=0.4"
+        );
+
+    </script>
+</body>
+</html>
