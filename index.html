@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="index, follow">
+    <title>Scale Media | Digital Marketing & Growth Agency</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <style>
+        :root {
+            --bg: #080808;
+            --text: #f0ece4;
+            --muted: #444444;
+            --accent: #c8ff00;
+            --surface: rgba(255,255,255,0.03);
+            --border: rgba(255,255,255,0.08);
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        html { scroll-behavior: smooth; }
+        
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: 'Inter', sans-serif; 
+            overflow-x: hidden; 
+            cursor: none; 
+        }
+        
+        ::selection { background: var(--accent); color: #000; }
+        
+        /* Typography */
+        h1, h2, h3, h4, h5, h6, .syne { font-family: 'Syne', sans-serif; }
+        .text-accent { color: var(--accent); }
+        .text-muted { color: var(--muted); }
+        
+        /* Cursor */
+        #cursor {
+            position: fixed;
+            top: 0; left: 0;
+            width: 6px; height: 6px;
+            background: #fff;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+            transform: translate(-50%, -50%);
+            transition: width 0.2s ease, height 0.2s ease, background 0.2s ease, border 0.2s ease;
+        }
+        #cursor.hovered {
+            width: 40px; height: 40px;
+            background: transparent;
+            border: 1.5px solid var(--accent);
+            mix-blend-mode: normal;
+        }
+        
+        /* Grain */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            pointer-events: none;
+            opacity: 0.04;
+            background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 2px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: #1a1a1a; }
+        
+        /* Utilities */
+        .flex { display: flex; }
+        .flex-col { display: flex; flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .text-center { text-align: center; }
+        .relative { position: relative; }
+        .absolute { position: absolute; }
+        .w-full { width: 100%; }
+        .h-full { height: 100%; }
+        .h-screen { height: 100vh; }
+        .uppercase { text-transform: uppercase; }
+        .lowercase { text-transform: lowercase; }
+        .italic { font-style: italic; }
+        .rounded-full { border-radius: 9999px; }
+        .tracking-widest { letter-spacing: 0.1em; }
+        
+        /* Loader */
+        #loader {
+            position: fixed; inset: 0;
+            background: var(--bg);
+            z-index: 10000;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 24px;
+        }
+        #loader-logo { opacity: 0; }
+        .loader-text {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800; font-size: 1.5rem;
+            color: var(--text); letter-spacing: 0.3em;
+            display: flex; overflow: hidden;
+        }
+        .loader-char { transform: translateY(20px); opacity: 0; }
+        .loader-progress {
+            width: 120px; height: 1px; background: #1a1a1a;
+            position: relative; overflow: hidden;
+        }
+        .loader-bar {
+            position: absolute; top: 0; left: 0; height: 100%;
+            background: var(--accent); width: 0%;
+        }
+        
+        /* WhatsApp Button */
+        #wa-btn {
+            position: fixed; bottom: 28px; right: 28px; z-index: 9000;
+            width: 56px; height: 56px; background: #25D366;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 20px rgba(37,211,102,0.4);
+            transform: translateY(100px); opacity: 0; cursor: pointer; text-decoration: none;
+            transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease;
+        }
+        #wa-btn:hover { transform: scale(1.1) translateY(0) !important; box-shadow: 0 8px 24px rgba(37,211,102,0.6); }
+        .wa-tooltip {
+            position: absolute; right: 70px; background: #1a1a1a; color: var(--text);
+            font-family: 'Inter', sans-serif; font-size: 12px; padding: 6px 12px;
+            border-radius: 99px; opacity: 0; transform: translateX(10px);
+            transition: all 0.2s ease; white-space: nowrap; pointer-events: none;
+        }
+        #wa-btn:hover .wa-tooltip { opacity: 1; transform: translateX(0); }
+        
+        /* Navbar */
+        nav {
+            position: fixed; top: 0; left: 0; width: 100%; height: 64px;
+            z-index: 100; padding: 0 60px; display: grid; grid-template-columns: auto 1fr auto;
+            align-items: center; transition: all 0.3s ease;
+        }
+        nav.scrolled {
+            background: rgba(8,8,8,0.9); backdrop-filter: blur(12px);
+        }
+        .nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .nav-logo span { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 15px; color: var(--text); text-transform: lowercase; }
+        
+        .nav-links { display: flex; justify-content: center; gap: 24px; }
+        .nav-link {
+            font-family: 'Inter', sans-serif; font-size: 13px; color: #888;
+            letter-spacing: 0.02em; text-decoration: none; position: relative;
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover { color: var(--text); }
+        .nav-link::after {
+            content: ''; position: absolute; bottom: -4px; left: 0;
+            width: 0; height: 1px; background: var(--accent); transition: width 0.3s ease;
+        }
+        .nav-link:hover::after { width: 100%; }
+        .nav-separator { color: #333; font-size: 10px; }
+        
+        .nav-cta {
+            font-family: 'Syne', sans-serif; font-weight: 600; font-size: 13px;
+            color: var(--text); text-decoration: none; text-transform: lowercase;
+            border: 1px solid rgba(255,255,255,0.2); padding: 8px 20px; border-radius: 99px;
+            transition: all 0.2s ease;
+        }
+        .nav-cta:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+        
+        .mobile-menu-btn { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; }
+        .mobile-menu-btn span { display: block; width: 20px; height: 2px; background: #fff; transition: all 0.3s ease; }
+        .mobile-nav {
+            position: fixed; inset: 0; background: var(--bg); z-index: 99;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px;
+            opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+        }
+        .mobile-nav.open { opacity: 1; pointer-events: all; }
+        .mobile-nav .nav-link { font-family: 'Syne', sans-serif; font-size: 2rem; color: var(--text); }
+        
+        /* Section 1: Scroll Narrative */
+        #narrative {
+            min-height: 600vh; position: relative; width: 100%;
+        }
+        .narrative-sticky {
+            position: sticky; top: 0; height: 100vh; width: 100%;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+        #canvas-container { position: absolute; inset: 0; z-index: 0; opacity: 0.12; pointer-events: none; }
+        .beat-container { position: absolute; z-index: 10; text-align: center; width: 100%; }
+        .beat-text {
+            font-family: 'Syne', sans-serif; font-weight: 800; color: var(--text);
+            line-height: 0.88; letter-spacing: -0.04em; text-transform: lowercase;
+            opacity: 0; filter: blur(12px); transform: translateY(40px);
+        }
+        .beat-1 { font-size: 10vw; }
+        .beat-2 { font-size: 8vw; }
+        .beat-3 { font-size: 10vw; }
+        .beat-3 span { border-bottom: 2px solid var(--accent); padding-bottom: 4px; }
+        .beat-4 { font-size: 7vw; display: flex; flex-direction: column; gap: 8px; }
+        .beat-4 .highlight { color: var(--accent); }
+        .beat-5 { font-size: 9vw; position: relative; display: inline-block; }
+        .beat-5::after { content: ''; position: absolute; top: 50%; left: 0; width: 0; height: 4px; background: var(--text); }
+        .beat-6 { font-size: 9vw; }
+        .beat-7 { font-size: 5vw; line-height: 1.1; font-weight: 700; color: #ddd; }
+        .beat-8 { font-size: 6vw; color: #888; }
+        .beat-9 { font-size: 13vw; clip-path: polygon(0 0, 0 0, 0 100%, 0% 100%); opacity: 1; filter: none; transform: none; }
+        .beat-10 { font-size: 6vw; display: flex; flex-direction: column; gap: 8px; font-weight: 700; }
+        .beat-10 span:nth-child(2) { color: var(--accent); }
+        
+        .narrative-cta {
+            position: absolute; z-index: 20; opacity: 0; pointer-events: none; text-align: center;
+            display: flex; flex-direction: column; align-items: center; gap: 24px;
+        }
+        .narrative-cta h2 { font-size: 4vw; font-family: 'Syne', sans-serif; font-weight: 800; }
+        .btn-scale {
+            display: inline-block; padding: 12px 32px; border: 1px solid var(--text); border-radius: 99px;
+            font-family: 'Syne', sans-serif; font-weight: 600; font-size: 16px; color: var(--text); text-decoration: none;
+            transition: all 0.2s ease; background: transparent; cursor: pointer;
+        }
+        .btn-scale:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+        
+        /* Common Section Styles */
+        .section-label { font-family: 'Inter', sans-serif; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 24px; }
+        .section-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(3rem, 7vw, 5.5rem); letter-spacing: -0.04em; line-height: 1; margin-bottom: 16px; }
+        .section-sub { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 15px; color: #666; margin-bottom: 48px; }
+        
+        /* Section 2: Results */
+        #results { background: var(--bg); padding: 160px 64px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+        .stat-item { display: flex; flex-direction: column; }
+        .stat-num { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(3rem, 8vw, 6rem); color: var(--text); }
+        .stat-label { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 13px; color: #666; margin-top: 8px; }
+        .stat-sep { width: 1px; background: #1a1a1a; margin: 0 16px; }
+        
+        /* Section 3: Services Carousel */
+        #services { background: var(--bg); padding: 128px 0 128px 64px; overflow: hidden; position: relative; }
+        .carousel-track-container { position: relative; width: 100%; overflow: hidden; cursor: grab; padding-bottom: 20px; }
+        .carousel-track-container:active { cursor: grabbing; }
+        .carousel-track { display: flex; gap: 24px; width: max-content; }
+        .service-card {
+            width: 320px; height: 400px; flex-shrink: 0;
+            background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px;
+            padding: 32px; display: flex; flex-direction: column; position: relative;
+            transition: transform 0.35s ease, border-color 0.35s ease;
+        }
+        .service-card:hover { transform: translateY(-6px); border-color: rgba(255,255,255,0.15); }
+        .card-num { font-family: 'Inter', sans-serif; font-size: 11px; color: #333; }
+        .card-arrow { position: absolute; top: 32px; right: 32px; color: #444; font-size: 18px; transition: transform 0.3s ease; }
+        .service-card:hover .card-arrow { transform: rotate(45deg); color: var(--text); }
+        .card-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.75rem; color: var(--text); line-height: 1.1; margin-top: auto; margin-bottom: 12px; }
+        .card-desc { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 13px; color: #666; line-height: 1.5; }
+        .carousel-fade { position: absolute; top: 0; right: 0; width: 100px; height: 100%; background: linear-gradient(to right, transparent, var(--bg)); pointer-events: none; }
+        .drag-hint { font-family: 'Inter', sans-serif; font-size: 12px; color: #333; margin-top: 16px; transition: opacity 0.5s; }
+        
+        /* Section 4: Case Study */
+        #case-study { background: var(--bg); padding: 128px 64px; }
+        .cs-intro { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 4vw; color: var(--text); line-height: 1.1; margin-bottom: 24px; max-width: 90%; }
+        .cs-meta { font-family: 'Inter', sans-serif; font-size: 12px; color: var(--muted); text-transform: uppercase; margin-bottom: 64px; display: flex; flex-wrap: wrap; gap: 16px; }
+        .cs-meta span::after { content: '·'; margin-left: 16px; }
+        .cs-meta span:last-child::after { content: ''; }
+        
+        .cs-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; margin-bottom: 80px; }
+        .cs-col h3 { font-family: 'Inter', sans-serif; font-size: 11px; color: #333; text-transform: uppercase; margin-bottom: 16px; letter-spacing: 0.1em; }
+        .cs-col p { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 16px; color: #888; line-height: 1.7; }
+        
+        .cs-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 48px; margin-bottom: 80px; }
+        .cs-stat-num { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 3.5rem; color: var(--text); }
+        .cs-stat-label { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 13px; color: #666; margin-top: 8px; }
+        
+        .cs-testimonial { border-left: 2px solid var(--accent); padding-left: 32px; max-width: 800px; margin-top: 64px; }
+        .cs-quote { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 1.4rem; font-style: italic; color: var(--text); line-height: 1.4; margin-bottom: 16px; }
+        .cs-author { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 13px; color: #666; }
+        
+        /* Section 5: Pricing */
+        #pricing { background: var(--bg); padding: 128px 64px; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: center; }
+        .price-card {
+            background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px;
+            padding: 40px 32px; display: flex; flex-direction: column; position: relative;
+        }
+        .price-card.featured { border-color: var(--accent); transform: scale(1.03); background: rgba(200,255,0,0.02); z-index: 2; }
+        .price-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--accent); color: var(--bg); font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; padding: 4px 12px; border-radius: 99px; }
+        .price-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.5rem; color: var(--text); margin-bottom: 8px; text-transform: lowercase; }
+        .price-amount { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 2.5rem; color: var(--text); margin-bottom: 8px; }
+        .price-amount span { font-size: 1rem; font-weight: 500; color: #666; }
+        .price-desc { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 13px; color: #666; margin-bottom: 32px; padding-bottom: 32px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .price-features { list-style: none; display: flex; flex-direction: column; gap: 16px; margin-bottom: 40px; flex-grow: 1; }
+        .price-features li { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 14px; color: #888; display: flex; align-items: flex-start; gap: 12px; }
+        .price-features li::before { content: '—'; color: #444; }
+        .price-features li.strong { color: var(--text); }
+        .btn-price { width: 100%; text-align: center; padding: 14px; border-radius: 99px; font-family: 'Syne', sans-serif; font-weight: 600; font-size: 14px; text-decoration: none; transition: all 0.2s ease; cursor: pointer; }
+        .btn-price-outline { border: 1px solid var(--text); color: var(--text); background: transparent; }
+        .btn-price-outline:hover { background: var(--text); color: var(--bg); }
+        .btn-price-fill { background: var(--accent); color: var(--bg); border: 1px solid var(--accent); }
+        .btn-price-fill:hover { opacity: 0.9; }
+        .pricing-footer { text-align: center; margin-top: 48px; font-family: 'Inter', sans-serif; font-weight: 300; font-size: 12px; color: #444; }
+        .pricing-footer a { color: var(--text); text-decoration: none; margin-top: 8px; display: inline-block; transition: color 0.2s; }
+        .pricing-footer a:hover { color: var(--accent); }
+        
+        /* Section 6: Agreement */
+        #agreement { background: var(--bg); padding: 96px 64px; border-top: 1px solid #111; display: flex; justify-content: center; }
+        .agreement-container { max-width: 680px; width: 100%; }
+        .accordion-item { border-bottom: 1px solid #111; padding: 20px 0; }
+        .accordion-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .accordion-title { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 15px; color: var(--text); text-transform: lowercase; }
+        .accordion-icon { font-family: 'Inter', sans-serif; font-size: 18px; color: #666; transition: transform 0.3s ease; }
+        .accordion-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+        .accordion-content { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 14px; color: #888; line-height: 1.8; padding-top: 16px; padding-bottom: 8px; }
+        .accordion-item.active .accordion-icon { transform: rotate(45deg); color: var(--text); }
+        .agreement-footer { margin-top: 32px; font-family: 'Inter', sans-serif; font-size: 12px; text-align: left; }
+        .agreement-footer a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
+        .agreement-footer a:hover { color: var(--text); }
+        
+        /* Section 7: Contact */
+        #contact { background: var(--bg); padding: 128px 64px; position: relative; overflow: hidden; }
+        .contact-glow { position: absolute; top: 50%; left: 70%; width: 800px; height: 800px; transform: translate(-50%, -50%); background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(200,255,0,0.04), transparent); pointer-events: none; z-index: 0; }
+        .contact-grid { display: grid; grid-template-columns: 60% 40%; gap: 64px; position: relative; z-index: 10; align-items: center; }
+        .contact-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(3.5rem, 9vw, 7rem); line-height: 0.88; letter-spacing: -0.04em; color: var(--text); margin-bottom: 24px; text-transform: lowercase; }
+        .contact-sub { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 15px; color: #666; max-width: 360px; line-height: 1.5; margin-bottom: 32px; }
+        .btn-audit { display: inline-block; background: var(--accent); color: var(--bg); font-family: 'Syne', sans-serif; font-weight: 600; font-size: 14px; padding: 12px 28px; border-radius: 99px; text-decoration: none; transition: all 0.3s ease; }
+        .btn-audit:hover { transform: scale(1.04); box-shadow: 0 0 24px rgba(200,255,0,0.3); }
+        
+        .contact-links { display: flex; flex-direction: column; gap: 32px; }
+        .contact-row { display: flex; flex-direction: column; gap: 8px; border-left: 2px solid transparent; padding-left: 0; transition: all 0.2s ease; cursor: pointer; text-decoration: none; }
+        .contact-label { font-family: 'Inter', sans-serif; font-size: 11px; color: #333; text-transform: uppercase; letter-spacing: 0.1em; transition: color 0.2s; }
+        .contact-value { font-family: 'Inter', sans-serif; font-weight: 400; font-size: 15px; color: var(--text); transition: color 0.2s; }
+        .contact-row:hover { border-left-color: var(--accent); padding-left: 16px; }
+        .contact-row:hover .contact-value { color: var(--accent); }
+        
+        /* Footer */
+        footer { background: var(--bg); border-top: 1px solid #111; padding: 32px 64px; }
+        .footer-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .footer-row:last-child { margin-bottom: 0; margin-top: 24px; }
+        .footer-logo { display: flex; align-items: center; gap: 8px; }
+        .footer-logo span { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 14px; color: var(--text); text-transform: lowercase; }
+        .footer-links { display: flex; gap: 24px; }
+        .footer-link { font-family: 'Inter', sans-serif; font-size: 12px; color: #444; text-decoration: none; transition: color 0.2s; lowercase; }
+        .footer-link:hover { color: var(--text); }
+        .footer-text { font-family: 'Inter', sans-serif; font-size: 11px; color: #333; lowercase; }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 48px 32px; }
+            .cs-cols { grid-template-columns: 1fr; gap: 40px; }
+            .cs-stats { grid-template-columns: repeat(2, 1fr); }
+            .pricing-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; }
+            .price-card.featured { transform: scale(1); }
+            .contact-grid { grid-template-columns: 1fr; gap: 64px; }
+            #services { padding-left: 32px; }
+        }
+        @media (max-width: 768px) {
+            nav { padding: 0 32px; grid-template-columns: auto 1fr; }
+            .nav-links, .nav-cta { display: none; }
+            .mobile-menu-btn { display: flex; justify-content: flex-end; width: 100%; align-items: flex-end; }
+            .beat-1 { font-size: 14vw; }
+            .beat-4 { font-size: 10vw; }
+            .beat-9 { font-size: 16vw; }
+            #results, #case-study, #pricing, #agreement, #contact { padding: 96px 32px; }
+            footer { padding: 32px; }
+            .footer-row { flex-direction: column; gap: 16px; align-items: flex-start; }
+            .cs-stats { grid-template-columns: 1fr; gap: 32px; }
+            .stat-sep.hidden-mobile { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Custom Cursor -->
+    <div id="cursor"></div>
+
+    <!-- Grain Overlay (via CSS) -->
+
+    <!-- Loader -->
+    <div id="loader">
+        <svg id="loader-logo" width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="28" width="8" height="16" fill="#f0ece4"/>
+            <rect x="16" y="20" width="8" height="24" fill="#f0ece4"/>
+            <rect x="28" y="10" width="8" height="34" fill="#f0ece4"/>
+            <polyline points="4,32 12,24 20,28 32,12" stroke="#c8ff00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <polyline points="32,12 40,6" stroke="#c8ff00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <polyline points="36,6 40,6 40,10" stroke="#c8ff00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+        <div class="loader-text">
+            <span class="loader-char">S</span><span class="loader-char">C</span><span class="loader-char">A</span><span class="loader-char">L</span><span class="loader-char">E</span><span class="loader-char">M</span><span class="loader-char">E</span><span class="loader-char">D</span><span class="loader-char">I</span><span class="loader-char">A</span>
+        </div>
+        <div class="loader-progress">
+            <div class="loader-bar" id="loader-bar"></div>
+        </div>
+    </div>
+
+    <!-- Floating WhatsApp Button -->
+    <a href="https://wa.me/917021850759" target="_blank" id="wa-btn" class="hover-target">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
+        </svg>
+        <span class="wa-tooltip">Chat with us</span>
+    </a>
+
+    <!-- Navbar -->
+    <nav id="navbar">
+        <a href="#" class="nav-logo hover-target">
+            <svg viewBox="0 0 48 48" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="4" y="28" width="8" height="16" fill="#f0ece4"/>
+                <rect x="16" y="20" width="8" height="24" fill="#f0ece4"/>
+                <rect x="28" y="10" width="8" height="34" fill="#f0ece4"/>
+                <polyline points="4,32 12,24 20,28 32,12" stroke="#c8ff00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                <polyline points="32,12 40,6" stroke="#c8ff00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                <polyline points="36,6 40,6 40,10" stroke="#c8ff00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+            <span>scalemedia</span>
+        </a>
+        
+        <div class="nav-links">
+            <a href="#results" class="nav-link hover-target">Results</a>
+            <span class="nav-separator">·</span>
+            <a href="#services" class="nav-link hover-target">Services</a>
+            <span class="nav-separator">·</span>
+            <a href="#case-study" class="nav-link hover-target">Case Study</a>
+            <span class="nav-separator">·</span>
+            <a href="#pricing" class="nav-link hover-target">Pricing</a>
+            <span class="nav-separator">·</span>
+            <a href="#contact" class="nav-link hover-target">Contact</a>
+        </div>
+        
+        <a href="https://wa.me/917021850759" target="_blank" class="nav-cta hover-target">book a call</a>
+        
+        <button class="mobile-menu-btn hover-target" id="mobile-toggle">
+            <span></span><span></span><span></span>
+        </button>
+    </nav>
+    
+    <div class="mobile-nav" id="mobile-nav">
+        <a href="#results" class="nav-link mobile-link hover-target">results</a>
+        <a href="#services" class="nav-link mobile-link hover-target">services</a>
+        <a href="#case-study" class="nav-link mobile-link hover-target">case study</a>
+        <a href="#pricing" class="nav-link mobile-link hover-target">pricing</a>
+        <a href="#contact" class="nav-link mobile-link hover-target">contact</a>
+    </div>
+
+    <!-- Section 1: Scroll Narrative -->
+    <section id="narrative">
+        <div class="narrative-sticky">
+            <div id="canvas-container"></div>
+            
+            <div class="beat-container beat-1-container"><h1 class="beat-text beat-1">million-dollar brands</h1></div>
+            <div class="beat-container beat-2-container"><div class="beat-text beat-2">have systems</div></div>
+            <div class="beat-container beat-3-container"><div class="beat-text beat-3">you <span>don't.</span></div></div>
+            
+            <div class="beat-container beat-4-container">
+                <div class="beat-text beat-4">
+                    <span>so instead of</span>
+                    <span class="highlight">growing your business</span>
+                </div>
+            </div>
+            
+            <div class="beat-container beat-5-container"><div class="beat-text beat-5">you're stuck</div></div>
+            <div class="beat-container beat-6-container"><div class="beat-text beat-6">running it.</div></div>
+            
+            <div class="beat-container beat-7-container">
+                <div class="beat-text beat-7">
+                    <div>we go into your brand</div>
+                    <div>find what's pulling you</div>
+                    <div>away from growth.</div>
+                </div>
+            </div>
+            
+            <div class="beat-container beat-8-container"><div class="beat-text beat-8">and</div></div>
+            <div class="beat-container beat-9-container"><div class="beat-text beat-9">eliminate it.</div></div>
+            
+            <div class="beat-container beat-10-container">
+                <div class="beat-text beat-10">
+                    <span>with systems that are</span>
+                    <span class="beat-10-w1 opacity-0">purpose-built</span>
+                    <span class="beat-10-w2 opacity-0 text-text">AI-powered</span>
+                    <span class="beat-10-w3 opacity-0 text-text">made for you.</span>
+                </div>
+            </div>
+            
+            <div class="narrative-cta">
+                <h2>ready?</h2>
+                <a href="https://wa.me/917021850759" target="_blank" class="btn-scale hover-target">let's scale →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: Results -->
+    <section id="results">
+        <div class="section-label">// what we've done</div>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-num" data-target="3" data-suffix="x">0</div>
+                <div class="stat-label">enrollment growth — kidzee andheri</div>
+            </div>
+            <div class="stat-sep hidden-mobile"></div>
+            <div class="stat-item">
+                <div class="stat-num" data-target="550" data-suffix="%">0</div>
+                <div class="stat-label">website traffic in 4 months</div>
+            </div>
+            <div class="stat-sep hidden-mobile"></div>
+            <div class="stat-item">
+                <div class="stat-num" data-target="180" data-prefix="₹">0</div>
+                <div class="stat-label">cost per lead vs ₹400 benchmark</div>
+            </div>
+            <div class="stat-sep hidden-mobile"></div>
+            <div class="stat-item">
+                <div class="stat-num" data-target="47" data-suffix="+">0</div>
+                <div class="stat-label">brands scaled</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: Services -->
+    <section id="services">
+        <div class="section-label">// what we do</div>
+        <h2 class="section-title">built for growth.</h2>
+        <p class="section-sub">eight systems. one agency.</p>
+        
+        <div class="carousel-track-container" id="carousel-container">
+            <div class="carousel-track" id="carousel-track">
+                <!-- Cards will be cloned by JS for infinite effect, original set here -->
+                <div class="service-card hover-target">
+                    <div class="card-num">01</div>
+                    <div class="card-arrow">↗</div>
+                    <h3 class="card-title">social media strategy</h3>
+                    <p class="card-desc">Platform-specific roadmaps that compound month over month.</p>
+                </div>
+                <div class="service-card hover-target">
+                    <div class="card-num">02</div>
+                    <div class="card-arrow">↗</div>
+                    <h3 class="card-title">content production</h3>
+                    <p class="card-desc">Reels, creatives, and copy that stop the scroll and drive action.</p>
+                </div>
+                <div class="service-card hover-target">
+                    <div class="card-num">03</div>
+                    <div class="card-arrow">↗</div>
+                    <h3 class="card-title">content writing</h3>
+                    <p class="card-desc">Captions, blogs, and ad copy that actually sound like a human wrote them.</p>
+                </div>
+                <div class="service-card hover-target">
+                    <div class="card-num">04</div>
+                    <div class="card-arrow">↗</div>
+                    <h3 class="card-title">content strategy</h3>
+                    <p class="card-desc">A full content calendar built around your brand's goals, not just trends.</p>
+                </div>
+                <div class="service-card hover-target">
+                    <div class="card-num">05</div>
+                    <div class="card-arrow">↗</div>
+                    <h3 class="card-title">brand positioning</h3>
+                    <p class="card-desc">We find your voice, sharpen your story, and make you impossible to ignore.</p>
+                </div>
+                <div class="service-card hover-target">
+                    <div class="card-num">06</div>
+                    <div class="card-arrow">↗</div>
+                    <h3 class="card-title">paid ads</h3>
+                    <p class="card-desc">Meta and Google campaigns that turn ad spend into measurable revenue.</p>
+                </div>
+                <div class="service-card hover-target">
+                    <div class="card-num">07</div>
+                    <div class="card-arrow">↗</div>
+                    <h3 class="card-title">SEO</h3>
+                    <p class="card-desc">Get found by the people already searching for what you offer.</p>
+                </div>
+                <div class="service-card hover-target">
+                    <div class="card-num">08</div>
+                    <div class="card-arrow">↗</div>
+                    <h3 class="card-title">web design</h3>
+                    <p class="card-desc">Conversion-focused websites that look nothing like a template.</p>
+                </div>
+            </div>
+        </div>
+        <div class="carousel-fade"></div>
+        <div class="drag-hint" id="drag-hint">drag to explore →</div>
+    </section>
+
+    <!-- Section 4: Case Study -->
+    <section id="case-study">
+        <div class="section-label">// proof it works</div>
+        <h2 class="cs-intro">kidzee andheri went from zero digital presence to mumbai's most searched preschool.</h2>
+        
+        <div class="cs-meta">
+            <span>client: kidzee andheri</span>
+            <span>industry: early education</span>
+            <span>location: andheri west, mumbai</span>
+        </div>
+        
+        <div class="cs-cols">
+            <div class="cs-col">
+                <h3>the challenge</h3>
+                <p>Despite 15 years of operations and strong word-of-mouth, the centre had zero digital footprint — no website, no Google profile, no social media. Two nearby competitors were gaining ground while admissions plateaued.</p>
+            </div>
+            <div class="cs-col">
+                <h3>our solution</h3>
+                <p>We built the entire digital stack from scratch — website, Google Business Profile, Instagram & Facebook pages, hyper-local Meta + Google ads, and a WhatsApp CRM nurturing flow. All within one academic year.</p>
+            </div>
+        </div>
+        
+        <div class="cs-stats">
+            <div class="cs-stat gs-reveal">
+                <div class="cs-stat-num">3x</div>
+                <div class="cs-stat-label">enrollment growth</div>
+            </div>
+            <div class="cs-stat gs-reveal">
+                <div class="cs-stat-num">550%</div>
+                <div class="cs-stat-label">website traffic in 4 months</div>
+            </div>
+            <div class="cs-stat gs-reveal">
+                <div class="cs-stat-num">4.8★</div>
+                <div class="cs-stat-label">google rating — 60+ verified reviews</div>
+            </div>
+            <div class="cs-stat gs-reveal">
+                <div class="cs-stat-num">₹180</div>
+                <div class="cs-stat-label">cost per lead vs ₹400–600 benchmark</div>
+            </div>
+            <div class="cs-stat gs-reveal">
+                <div class="cs-stat-num">38%</div>
+                <div class="cs-stat-label">lead-to-visit conversion rate</div>
+            </div>
+            <div class="cs-stat gs-reveal">
+                <div class="cs-stat-num">#1</div>
+                <div class="cs-stat-label">google maps — "preschool in andheri west"</div>
+            </div>
+        </div>
+        
+        <div class="cs-testimonial gs-reveal">
+            <div class="cs-quote">"We were sceptical that digital marketing could work for a small neighbourhood preschool. Within six months, we had more enquiries than we knew how to handle."</div>
+            <div class="cs-author">— Director, Kidzee Andheri West</div>
+        </div>
+    </section>
+
+    <!-- Section 5: Pricing -->
+    <section id="pricing">
+        <div class="section-label">// investment</div>
+        <h2 class="section-title">simple pricing.</h2>
+        <p class="section-sub">no lock-in. no surprises. cancel anytime.</p>
+        
+        <div class="pricing-grid">
+            <div class="price-card gs-reveal">
+                <h3 class="price-name">starter</h3>
+                <div class="price-amount">₹5,000<span>/month</span></div>
+                <div class="price-desc">for brands finding their footing</div>
+                <ul class="price-features">
+                    <li>brand positioning</li>
+                    <li>content strategy</li>
+                    <li>instagram management</li>
+                    <li>4 posts / reels per month</li>
+                    <li>basic growth setup</li>
+                    <li>1 content edit per week</li>
+                    <li>audience targeting basics</li>
+                    <li>monthly check-in call</li>
+                </ul>
+                <a href="https://wa.me/917021850759" target="_blank" class="btn-price btn-price-outline hover-target">get started →</a>
+            </div>
+            
+            <div class="price-card featured gs-reveal">
+                <div class="price-badge">most popular</div>
+                <h3 class="price-name">growth</h3>
+                <div class="price-amount">₹11,999<span>/month</span></div>
+                <div class="price-desc">for brands ready to scale</div>
+                <ul class="price-features">
+                    <li class="strong">everything in starter</li>
+                    <li>instagram + facebook management</li>
+                    <li>10–14 posts per month (reels + creatives)</li>
+                    <li>advanced reel editing (hooks, trends)</li>
+                    <li>full content calendar & strategy</li>
+                    <li>niche & competitor research</li>
+                    <li>custom hashtag strategy</li>
+                    <li>basic comment management</li>
+                    <li>monthly performance report</li>
+                </ul>
+                <a href="https://wa.me/917021850759" target="_blank" class="btn-price btn-price-fill hover-target">let's scale →</a>
+            </div>
+            
+            <div class="price-card gs-reveal">
+                <h3 class="price-name">scale</h3>
+                <div class="price-amount">₹15,000+<span>/month</span></div>
+                <div class="price-desc">for brands ready to dominate</div>
+                <ul class="price-features">
+                    <li class="strong">everything in growth</li>
+                    <li>meta paid ads (ig + fb)</li>
+                    <li>seo & on-page optimisation</li>
+                    <li>content writing (captions + blogs)</li>
+                    <li>multi-platform social strategy</li>
+                    <li>weekly reporting & optimisation</li>
+                    <li>dedicated account strategist</li>
+                    <li>priority support</li>
+                </ul>
+                <a href="https://wa.me/917021850759" target="_blank" class="btn-price btn-price-outline hover-target">apply now →</a>
+            </div>
+        </div>
+        
+        <div class="pricing-footer">
+            all plans month-to-month · no contracts · cancel with 30 days notice<br>
+            <a href="https://wa.me/917021850759" target="_blank" class="hover-target">not sure? book a free audit call →</a>
+        </div>
+    </section>
+
+    <!-- Section 6: Agreement -->
+    <section id="agreement">
+        <div class="agreement-container">
+            <div class="section-label text-center">// how we work together</div>
+            <h2 class="section-title text-center" style="font-size: clamp(2.5rem, 5vw, 4rem);">no surprises.</h2>
+            <p class="section-sub text-center">key terms from our client agreement. full document sent on onboarding.</p>
+            
+            <div class="accordion">
+                <div class="accordion-item hover-target">
+                    <div class="accordion-header">
+                        <h3 class="accordion-title">payment terms</h3>
+                        <span class="accordion-icon">+</span>
+                    </div>
+                    <div class="accordion-body">
+                        <div class="accordion-content">Invoices issued on the 1st. Payment due in 7 days. Late payments: 2% monthly surcharge. Services pause after 10 days non-payment. Fees exclude GST.</div>
+                    </div>
+                </div>
+                <div class="accordion-item hover-target">
+                    <div class="accordion-header">
+                        <h3 class="accordion-title">client obligations</h3>
+                        <span class="accordion-icon">+</span>
+                    </div>
+                    <div class="accordion-body">
+                        <div class="accordion-content">Provide brand assets within 5 business days. Approve content within 48 hours. Grant access to accounts. No changes to live ads without written approval.</div>
+                    </div>
+                </div>
+                <div class="accordion-item hover-target">
+                    <div class="accordion-header">
+                        <h3 class="accordion-title">intellectual property</h3>
+                        <span class="accordion-icon">+</span>
+                    </div>
+                    <div class="accordion-body">
+                        <div class="accordion-content">All deliverables assigned to client on full payment. Scale Media may portfolio the work unless written objection within 14 days.</div>
+                    </div>
+                </div>
+                <div class="accordion-item hover-target">
+                    <div class="accordion-header">
+                        <h3 class="accordion-title">termination</h3>
+                        <span class="accordion-icon">+</span>
+                    </div>
+                    <div class="accordion-body">
+                        <div class="accordion-content">30 days written notice by either party. Immediate termination on non-payment (15+ days) or material breach. Outstanding fees due immediately on exit.</div>
+                    </div>
+                </div>
+                <div class="accordion-item hover-target">
+                    <div class="accordion-header">
+                        <h3 class="accordion-title">confidentiality</h3>
+                        <span class="accordion-icon">+</span>
+                    </div>
+                    <div class="accordion-body">
+                        <div class="accordion-content">All non-public information kept confidential for 2 years. No third-party disclosure without written consent.</div>
+                    </div>
+                </div>
+                <div class="accordion-item hover-target">
+                    <div class="accordion-header">
+                        <h3 class="accordion-title">results disclaimer</h3>
+                        <span class="accordion-icon">+</span>
+                    </div>
+                    <div class="accordion-body">
+                        <div class="accordion-content">Scale Media does not guarantee follower counts, leads, or revenue. Outcomes depend on factors outside our control. Liability capped at 3 months' fees.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="agreement-footer">
+                <a href="mailto:scalemedia2214@gmail.com" class="hover-target">request full agreement →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 7: Contact -->
+    <section id="contact">
+        <div class="contact-glow"></div>
+        <div class="contact-grid">
+            <div>
+                <h2 class="contact-title gs-reveal">let's<br>talk.</h2>
+                <p class="contact-sub gs-reveal">ready to stop posting into the void? we'll audit your brand for free and show you exactly what's holding you back.</p>
+                <a href="https://wa.me/917021850759" target="_blank" class="btn-audit hover-target gs-reveal">book a free audit →</a>
+            </div>
+            
+            <div class="contact-links gs-reveal">
+                <a href="mailto:scalemedia2214@gmail.com" class="contact-row hover-target">
+                    <span class="contact-label">email</span>
+                    <span class="contact-value">scalemedia2214@gmail.com</span>
+                </a>
+                <a href="tel:+917021850759" class="contact-row hover-target">
+                    <span class="contact-label">call</span>
+                    <span class="contact-value">+91 70218 50759</span>
+                </a>
+                <a href="https://wa.me/918591725750" target="_blank" class="contact-row hover-target">
+                    <span class="contact-label">whatsapp</span>
+                    <span class="contact-value">+91 85917 25750</span>
+                </a>
+                <a href="https://www.instagram.com/scalemedia_1/" target="_blank" class="contact-row hover-target">
+                    <span class="contact-label">instagram</span>
+                    <span class="contact-value">@scalemedia_1</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-row">
+            <div class="footer-logo">
+                <svg viewBox="0 0 48 48" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="4" y="28" width="8" height="16" fill="#f0ece4"/>
+                    <rect x="16" y="20" width="8" height="24" fill="#f0ece4"/>
+                    <rect x="28" y="10" width="8" height="34" fill="#f0ece4"/>
+                    <polyline points="4,32 12,24 20,28 32,12" stroke="#c8ff00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    <polyline points="32,12 40,6" stroke="#c8ff00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    <polyline points="36,6 40,6 40,10" stroke="#c8ff00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                </svg>
+                <span>scalemedia</span>
+            </div>
+            <div class="footer-links">
+                <a href="https://www.instagram.com/scalemedia_1/" target="_blank" class="footer-link hover-target">instagram</a>
+                <a href="mailto:scalemedia2214@gmail.com" class="footer-link hover-target">email</a>
+                <a href="https://wa.me/918591725750" target="_blank" class="footer-link hover-target">whatsapp</a>
+            </div>
+        </div>
+        <div class="footer-row">
+            <div class="footer-text">© 2025 scalemedia · mumbai, india</div>
+            <div class="footer-text">digital marketing · web design · smm</div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Custom Cursor
+        const cursor = document.getElementById('cursor');
+        let mouseX = 0, mouseY = 0;
+        let cursorX = 0, cursorY = 0;
+        
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+        
+        function animateCursor() {
+            let ease = 0.12;
+            cursorX += (mouseX - cursorX) * ease;
+            cursorY += (mouseY - cursorY) * ease;
+            cursor.style.transform = `translate(${cursorX}px, ${cursorY}px) translate(-50%, -50%)`;
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+        
+        document.querySelectorAll('.hover-target').forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+        });
+
+        // Loader Sequence
+        window.addEventListener('load', () => {
+            const tl = gsap.timeline();
+            
+            tl.to('#loader-logo', { opacity: 1, duration: 0.4 })
+              .to('.loader-char', { y: 0, opacity: 1, stagger: 0.04, ease: "power3.out", duration: 0.8 }, "-=0.2")
+              .to('#loader-bar', { width: "100%", duration: 1.6, ease: "power2.inOut" }, "-=0.8")
+              .to('#loader', { opacity: 0, duration: 0.5, delay: 0.2, onComplete: () => {
+                  document.getElementById('loader').style.display = 'none';
+                  initMainAnimations();
+              }});
+        });
+
+        function initMainAnimations() {
+            // Show WA Button
+            gsap.to('#wa-btn', { y: 0, opacity: 1, duration: 0.6, delay: 0.3, ease: "cubic-bezier(0.16,1,0.3,1)" });
+            
+            // Navbar Scroll
+            window.addEventListener('scroll', () => {
+                if(window.scrollY > 80) document.getElementById('navbar').classList.add('scrolled');
+                else document.getElementById('navbar').classList.remove('scrolled');
+            });
+            
+            // Mobile Menu
+            const menuBtn = document.getElementById('mobile-toggle');
+            const mobileNav = document.getElementById('mobile-nav');
+            const mobileLinks = document.querySelectorAll('.mobile-link');
+            
+            menuBtn.addEventListener('click', () => {
+                mobileNav.classList.toggle('open');
+                if(mobileNav.classList.contains('open')) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            });
+            
+            mobileLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileNav.classList.remove('open');
+                    document.body.style.overflow = '';
+                });
+            });
+
+            // Three.js Background for Narrative
+            initThreeJS();
+
+            // GSAP ScrollTrigger Narrative (digidifference style)
+            gsap.registerPlugin(ScrollTrigger);
+            
+            // Text entering standard: opacity 0 to 1, y 40 to 0, filter blur(12px) to 0
+            const narrativeTl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: "#narrative",
+                    start: "top top",
+                    end: "bottom bottom",
+                    scrub: 1,
+                }
+            });
+            
+            // Helpers
+            const enter = (selector) => {
+                return gsap.fromTo(selector, 
+                    { opacity: 0, y: 40, filter: 'blur(12px)' }, 
+                    { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1 }
+                );
+            };
+            const exit = (selector) => {
+                return gsap.to(selector, { opacity: 0.15, filter: 'blur(8px)', duration: 1 });
+            };
+            const hide = (selector) => {
+                return gsap.to(selector, { opacity: 0, duration: 0.5 });
+            };
+            
+            // The 10 Beats
+            // Beat 1: "million-dollar brands"
+            narrativeTl.add(enter('.beat-1'))
+                       .add(exit('.beat-1'), "+=0.5")
+                       .add(hide('.beat-1'));
+                       
+            // Beat 2: "have systems"
+            narrativeTl.add(enter('.beat-2'), "-=0.5")
+                       .add(exit('.beat-2'), "+=0.5")
+                       .add(hide('.beat-2'));
+                       
+            // Beat 3: "you don't."
+            narrativeTl.add(enter('.beat-3'), "-=0.5")
+                       .add(exit('.beat-3'), "+=0.5")
+                       .add(hide('.beat-3'));
+                       
+            // Beat 4: "so instead of / growing your business"
+            narrativeTl.add(enter('.beat-4'), "-=0.5")
+                       .add(exit('.beat-4'), "+=0.5")
+                       .add(hide('.beat-4'));
+                       
+            // Beat 5: "you're stuck"
+            narrativeTl.add(enter('.beat-5'), "-=0.5")
+            // Strikethrough effect
+            narrativeTl.to('.beat-5::after', { width: "100%", duration: 0.5 }, "+=0.2")
+                       .add(exit('.beat-5'), "+=0.2")
+                       .add(hide('.beat-5'));
+                       
+            // Beat 6: "running it."
+            narrativeTl.add(enter('.beat-6'), "-=0.5")
+                       .add(exit('.beat-6'), "+=0.5")
+                       .add(hide('.beat-6'));
+                       
+            // Beat 7: "we go into your brand..."
+            narrativeTl.add(enter('.beat-7'), "-=0.5")
+                       .add(exit('.beat-7'), "+=1")
+                       .add(hide('.beat-7'));
+                       
+            // Beat 8: "and"
+            narrativeTl.add(enter('.beat-8'), "-=0.5")
+                       .add(exit('.beat-8'), "+=0.2")
+                       .add(hide('.beat-8'));
+                       
+            // Beat 9: "eliminate it." (Clip path wipe)
+            narrativeTl.fromTo('.beat-9', 
+                        { clipPath: 'polygon(0 0, 0 0, 0 100%, 0% 100%)', opacity: 1, filter: 'none', y: 0 },
+                        { clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0% 100%)', duration: 1.5, ease: 'power2.inOut' })
+                       .add(exit('.beat-9'), "+=0.5")
+                       .add(hide('.beat-9'));
+                       
+            // Beat 10: "with systems that are..."
+            narrativeTl.add(enter('.beat-10 > span:first-child'))
+                       .to('.beat-10-w1', { opacity: 1, duration: 0.5 })
+                       .to('.beat-10-w2', { opacity: 1, duration: 0.5 })
+                       .to('.beat-10-w3', { opacity: 1, duration: 0.5 })
+                       .add(exit('.beat-10'), "+=1")
+                       .add(hide('.beat-10'));
+                       
+            // CTA
+            narrativeTl.fromTo('.narrative-cta', 
+                { opacity: 0, y: 40, pointerEvents: 'none' },
+                { opacity: 1, y: 0, pointerEvents: 'all', duration: 1 }
+            );
+
+            // Stats Counting
+            const stats = document.querySelectorAll('.stat-num');
+            stats.forEach(stat => {
+                ScrollTrigger.create({
+                    trigger: "#results",
+                    start: "top 75%",
+                    once: true,
+                    onEnter: () => {
+                        const target = parseFloat(stat.getAttribute('data-target'));
+                        const prefix = stat.getAttribute('data-prefix') || '';
+                        const suffix = stat.getAttribute('data-suffix') || '';
+                        
+                        gsap.to(stat, {
+                            innerHTML: target,
+                            duration: 2,
+                            ease: "power3.out",
+                            snap: { innerHTML: 1 },
+                            onUpdate: function() {
+                                stat.innerHTML = prefix + Math.round(this.targets()[0].innerHTML) + suffix;
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Services Carousel Drift
+            const track = document.getElementById('carousel-track');
+            const trackContainer = document.getElementById('carousel-container');
+            
+            // Clone cards for infinite scroll
+            const cards = track.innerHTML;
+            track.innerHTML += cards + cards; // Clone twice for smoothness
+            
+            let pos = 0;
+            let speed = 0.5;
+            let isHovering = false;
+            let isDragging = false;
+            let startX = 0;
+            let scrollLeft = 0;
+            let rafId;
+            
+            function drift() {
+                if(!isHovering && !isDragging) {
+                    pos -= speed;
+                    // Reset position when we scroll past 1 set of cards
+                    // 8 cards * (320px width + 24px gap) = 2752px
+                    if(Math.abs(pos) >= 2752) {
+                        pos = 0;
+                    }
+                    track.style.transform = `translateX(${pos}px)`;
+                }
+                rafId = requestAnimationFrame(drift);
+            }
+            drift();
+            
+            trackContainer.addEventListener('mouseenter', () => isHovering = true);
+            trackContainer.addEventListener('mouseleave', () => {
+                isHovering = false;
+                isDragging = false;
+            });
+            
+            // Drag logic
+            trackContainer.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                startX = e.pageX - trackContainer.offsetLeft;
+                scrollLeft = pos;
+                document.getElementById('drag-hint').style.opacity = '0';
+            });
+            trackContainer.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+            trackContainer.addEventListener('mousemove', (e) => {
+                if(!isDragging) return;
+                e.preventDefault();
+                const x = e.pageX - trackContainer.offsetLeft;
+                const walk = (x - startX) * 2;
+                pos = scrollLeft + walk;
+                track.style.transform = `translateX(${pos}px)`;
+            });
+
+            // Touch events for mobile
+            trackContainer.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                startX = e.touches[0].pageX - trackContainer.offsetLeft;
+                scrollLeft = pos;
+                document.getElementById('drag-hint').style.opacity = '0';
+            }, {passive: true});
+            trackContainer.addEventListener('touchend', () => isDragging = false);
+            trackContainer.addEventListener('touchmove', (e) => {
+                if(!isDragging) return;
+                const x = e.touches[0].pageX - trackContainer.offsetLeft;
+                const walk = (x - startX) * 2;
+                pos = scrollLeft + walk;
+                track.style.transform = `translateX(${pos}px)`;
+            }, {passive: true});
+
+            // Reveal animations for other sections
+            gsap.utils.toArray('.gs-reveal').forEach(elem => {
+                gsap.from(elem, {
+                    scrollTrigger: {
+                        trigger: elem,
+                        start: "top 85%",
+                        once: true
+                    },
+                    y: 40,
+                    opacity: 0,
+                    filter: 'blur(8px)',
+                    duration: 0.8,
+                    ease: "power3.out"
+                });
+            });
+
+            // Accordion Logic
+            const accordions = document.querySelectorAll('.accordion-item');
+            accordions.forEach(acc => {
+                const header = acc.querySelector('.accordion-header');
+                const body = acc.querySelector('.accordion-body');
+                
+                header.addEventListener('click', () => {
+                    const isOpen = acc.classList.contains('active');
+                    
+                    // Close all
+                    accordions.forEach(a => {
+                        a.classList.remove('active');
+                        a.querySelector('.accordion-body').style.maxHeight = null;
+                        a.querySelector('.accordion-icon').style.transform = 'rotate(0deg)';
+                    });
+                    
+                    // Open clicked if it was closed
+                    if(!isOpen) {
+                        acc.classList.add('active');
+                        body.style.maxHeight = body.scrollHeight + "px";
+                        acc.querySelector('.accordion-icon').style.transform = 'rotate(45deg)';
+                    }
+                });
+            });
+        }
+
+        // Three.js Particle Background
+        function initThreeJS() {
+            const container = document.getElementById('canvas-container');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+            
+            const particlesGeometry = new THREE.BufferGeometry();
+            const particlesCount = 400;
+            const posArray = new Float32Array(particlesCount * 3);
+            
+            for(let i = 0; i < particlesCount * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 10;
+            }
+            
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            
+            const material = new THREE.PointsMaterial({
+                size: 0.02,
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.8,
+                blending: THREE.AdditiveBlending
+            });
+            
+            const particlesMesh = new THREE.Points(particlesGeometry, material);
+            scene.add(particlesMesh);
+            
+            camera.position.z = 3;
+            
+            function animate() {
+                requestAnimationFrame(animate);
+                particlesMesh.position.y += 0.001; // Slow drift upward
+                if(particlesMesh.position.y > 2) {
+                    particlesMesh.position.y = -2;
+                }
+                renderer.render(scene, camera);
+            }
+            animate();
+            
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+    </script>
+</body>
+</html>
