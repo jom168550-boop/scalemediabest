@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -600,6 +600,51 @@
             line-height: 1;
         }
 
+        .contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-top: 3rem;
+            opacity: 0;
+        }
+
+        .contact-form input,
+        .contact-form textarea {
+            width: 100%;
+            padding: 1rem 0;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(242, 237, 230, 0.3);
+            color: var(--text-main);
+            font-family: 'Ubuntu', sans-serif;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+            text-transform: capitalize;
+        }
+
+        .contact-form textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .contact-form input:focus,
+        .contact-form textarea:focus {
+            border-bottom-color: var(--accent);
+        }
+
+        .contact-form input::placeholder,
+        .contact-form textarea::placeholder {
+            color: var(--text-muted-light);
+        }
+
+        .contact-form .btn-cta {
+            margin-top: 1rem;
+            align-self: flex-start;
+            background: transparent;
+            cursor: none;
+        }
+
         .contact-right {
             display: flex;
             flex-direction: column;
@@ -713,10 +758,10 @@
 
     <!-- Scroll Narrative -->
     <section class="narrative" id="narrative-section">
-        <div class="narrative-text n-beat">you're posting every day</div>
+        <div class="narrative-text n-beat">You're Posting Every Day</div>
         <div class="narrative-text n-beat">And Getting Nothing Back</div>
-        <div class="narrative-text n-beat">Because content without strategy is just noise</div>
-        <div class="narrative-text n-beat" style="color: var(--accent)">scalemedia builds the system that turns attention into revenue</div>
+        <div class="narrative-text n-beat">Because Content Without Strategy Is Just Noise</div>
+        <div class="narrative-text n-beat" style="color: var(--accent)">Scalemedia builds the system that turns attention into revenue</div>
     </section>
 
     <!-- Services Section -->
@@ -760,11 +805,11 @@
     <!-- Results Section -->
     <section class="results" id="results-section">
         <div class="stat">
-            <div class="stat-num" data-target="3x">0</div>
+            <div class="stat-num" data-target="10">0</div>
             <div class="stat-label">average reach growth</div>
         </div>
         <div class="stat">
-            <div class="stat-num" data-target="4x">0</div>
+            <div class="stat-num" data-target="3x">0</div>
             <div class="stat-label">avg engagement rate increase</div>
         </div>
         <div class="stat">
@@ -890,6 +935,12 @@
     <section class="contact-split" id="contact">
         <div class="contact-left">
             <h2 id="split-title">let's talk.</h2>
+            <form action="https://formspree.io/f/mvzlwbgn" method="POST" class="contact-form" id="contact-form">
+                <input type="text" name="name" placeholder="your name" required data-hover>
+                <input type="email" name="email" placeholder="your email" required data-hover>
+                <textarea name="message" placeholder="how can we help?" required data-hover></textarea>
+                <button type="submit" class="btn-cta" data-hover>send message</button>
+            </form>
         </div>
         <div class="contact-right" id="split-details">
             <div class="contact-item">
@@ -1090,6 +1141,10 @@
         contactSplitTl.fromTo('#split-title', 
             { opacity: 0, x: -50 },
             { opacity: 1, x: 0, duration: 0.8, ease: 'power3.out' }
+        ).fromTo('.contact-form',
+            { opacity: 0, y: 20 },
+            { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' },
+            "-=0.4"
         ).fromTo('.contact-item',
             { opacity: 0, y: 20 },
             { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: 'power3.out' },
